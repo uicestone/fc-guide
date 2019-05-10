@@ -1,19 +1,24 @@
 <template lang="pug">
   #app
     .block
-      el-carousel(trigger='click' height='250px')
-        el-carousel-item(v-for='url in imageUrls' :key='url')
-          img(:src='url')
+      el-carousel(trigger="click" height="250px")
+        el-carousel-item(v-for="url in imageUrls" :key="url")
+          img(:src="url")
       el-card.box-card
-        .clearfix(slot='header')
+        .clearfix(slot="header")
           span 景点介绍
-        .text 景点介绍景点介绍景点介绍景点介绍，景点介绍景点介绍景点介绍，景点介绍景点介绍景点介绍。
+        p 景点介绍景点介绍景点介绍景点介绍，景点介绍景点介绍景点介绍。
+        p 景点介绍景点介绍景点介绍。
       el-card.box-card
-        .clearfix(slot='header')
+        .clearfix(slot="header")
           span 路线与时长
-        .text 路线与时长路线与时长，路线与时长，路线与时长。路线与时长路线与时长。
+        p 路线与时长路线与时长，路线与时长，路线与时长。路线与时长路线与时长。
+        ol
+          li 路线与时长1
+          li 路线与时长2
+          li 路线与时长3
       el-card.box-card
-        .clearfix(slot='header')
+        .clearfix(slot="header")
           span 收费
         el-row
           el-col(:span="12")
@@ -24,6 +29,31 @@
             el-table(:data="quotes.slice(4, 8)")
               el-table-column(prop="membersCount" label="人数" width="60px")
               el-table-column(prop="price" label="价格（¥）")
+      el-card.box-card.no-padding
+        el-calendar
+      el-card.box-card
+        .clearfix(slot="header")
+          span 预订
+        el-form(ref="form" :model="booking" :rules="formRules" label-position="left" label-width="60px")
+          el-form-item(label="邮箱" prop="userEmail")
+            el-input(type="email" v-model="booking.userEmail" placeholder="接收邮件完成下面的步骤")
+          el-form-item(label="人数" prop="membersCount")
+            el-select(v-model="booking.membersCount")
+              el-option(v-for="n in 8" :value="n" :label="n")
+          el-form-item(label="日期" prop="date")
+            el-date-picker(
+              v-model="booking.date"
+              format="yyyy-MM-dd"
+              value-format="yyyy-MM-dd"
+            )
+          el-form-item(label="时间" prop="ampm")
+            el-radio-group(v-model="booking.ampm")
+              el-radio(label="am") 上午
+              el-radio(label="pm") 下午
+          el-form-item.text-right
+            el-button(type="primary" @click="submitBooking")
+              span 登录并预订
+              span(v-if="booking.price")  ¥{{ booking.price }}
 </template>
 
 <script>
@@ -49,10 +79,43 @@ export default {
     ];
     return {
       imageUrls,
-      quotes
+      quotes,
+      formRules: {
+        userEmail: [
+          { required: true, message: "请填写邮箱" },
+          {
+            type: "email",
+            message: "请输入正确的邮箱地址",
+            trigger: ["blur", "change"]
+          }
+        ],
+        membersCount: { required: true, message: "请选择人数" },
+        date: { required: true, message: "请选择日期" },
+        ampm: { required: true, message: "请选择时间" }
+      },
+      booking: {},
+      userEmail: null
     };
   },
-  components: {}
+  methods: {
+    submitBooking() {
+      this.$refs.form.validate(valid => {
+        if (valid) {
+          alert("submit!");
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    }
+  },
+  watch: {
+    "booking.membersCount"(count) {
+      const quote = this.quotes.filter(q => q.membersCount === count)[0];
+      if (!quote) return;
+      this.booking.price = quote.price;
+    }
+  }
 };
 </script>
 
@@ -66,7 +129,7 @@ body {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
+  // text-align: center;
   color: #2c3e50;
   /* margin-top: 60px; */
 }
@@ -83,5 +146,29 @@ body {
   width: 90%;
   margin: 20px auto;
   border-radius: 10px;
+  &.no-padding {
+    .el-card__body {
+      padding: 0;
+    }
+  }
+}
+
+.el-form {
+  padding: 10px 25px;
+  .el-form-item__content {
+    // width: 70%;
+    > .el-input,
+    .el-select {
+      width: 100% !important;
+    }
+  }
+}
+
+.el-calendar-table .el-calendar-day {
+  height: 50px;
+}
+
+.text-right {
+  text-align: right;
 }
 </style>
