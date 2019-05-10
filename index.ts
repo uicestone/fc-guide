@@ -3,8 +3,8 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import env from "dotenv";
 import http from "http";
-import handleError from "./utils/handleError";
-import applyRoutes from "./apis";
+import handleError from "./server/utils/handleError";
+import applyRoutes from "./server/apis";
 
 const app = express();
 const router = express.Router();
@@ -17,12 +17,11 @@ console.log(`[SYS] System time is ${new Date()}`);
 mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true });
 mongoose.Promise = global.Promise;
 
-app.use(bodyParser.json({ limit: "4mb" }));
-applyRoutes(app, router);
-
 app.use(handleError);
-
+app.use(bodyParser.json({ limit: "4mb" }));
+app.use("/", express.static("./dist"));
 app.set("trust proxy", "loopback");
+applyRoutes(app, router);
 
 const port = process.env.PORT_HTTP;
 
