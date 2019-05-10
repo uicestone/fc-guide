@@ -1,6 +1,7 @@
 import Vue from "vue";
 import {
   Button,
+  ButtonGroup,
   Carousel,
   CarouselItem,
   Card,
@@ -23,6 +24,7 @@ import App from "./App.vue";
 
 [
   Button,
+  ButtonGroup,
   Carousel,
   CarouselItem,
   Card,
