@@ -20,6 +20,7 @@ import {
   Calendar
 } from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
+import VueResource from "vue-resource";
 import App from "./App.vue";
 
 [
@@ -42,6 +43,7 @@ import App from "./App.vue";
   RadioGroup,
   Calendar
 ].forEach(c => Vue.use(c));
+Vue.use(VueResource);
 
 Vue.config.productionTip = false;
 

@@ -53,40 +53,28 @@
               el-radio(label="pm") 下午
           el-form-item(label="人数" prop="membersCount")
             el-select(v-model="booking.membersCount")
-              el-option(v-for="n in 8" :value="n" :label="n")
+              el-option(v-for="n in 8" :key="n" :value="n" :label="n")
           el-form-item(label="邮箱" prop="userEmail")
             el-input(type="email" v-model="booking.userEmail" placeholder="接收邮件完成下面的步骤")
       el-button.block-button(type="primary" size="medium" @click="submitBooking")
-        span 登录并预订
+        span 发送付款邮件
         span(v-if="booking.price")  ¥{{ booking.price }}
 </template>
 
 <script>
+import Vue from "vue";
 import moment from "moment";
+import { Config } from "./resources.ts";
 
 export default {
   name: "app",
   data() {
-    const quotesRaw = [
-      [1, 800],
-      [2, 1200],
-      [3, 1600],
-      [4, 2000],
-      [5, 2400],
-      [6, 2800],
-      [7, 3200],
-      [8, 3600]
-    ];
-    const quotes = quotesRaw.map(i => ({ membersCount: i[0], price: i[1] }));
-    const imageUrls = [
-      "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1557505020755&di=7a4f3a7a2c788f136ab6930a8010826a&imgtype=0&src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201806%2F17%2F20180617134701_RjfdE.jpeg",
-      "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1557505020755&di=662ab5fa12462f24bd8d3dc6dba09f6c&imgtype=0&src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F0101cc58ada297a801219c77f23c96.jpg%401280w_1l_2o_100sh.jpg",
-      "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1557505020755&di=36c7fd2647056e5a18d33d82b64ad4aa&imgtype=0&src=http%3A%2F%2Fimglf0.ph.126.net%2FzSbqVU--8g24tShNU79dtA%3D%3D%2F978407019063974577.jpg",
-      "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1557505020755&di=f20beac857b8c2833448bb3f4583d8f7&imgtype=0&src=http%3A%2F%2Fphoto.tuchong.com%2F2511444%2Ff%2F20234982.jpg"
-    ];
     return {
-      imageUrls,
-      quotes,
+      imageUrls: [],
+      quotes: [[]],
+      booking: {},
+      userEmail: null,
+      selectedDate: null,
       formRules: {
         userEmail: [
           { required: true, message: "请填写邮箱" },
@@ -99,10 +87,7 @@ export default {
         membersCount: { required: true, message: "请选择人数" },
         date: { required: true, message: "请选择日期", trigger: ["blur"] },
         ampm: { required: true, message: "请选择时间" }
-      },
-      booking: {},
-      userEmail: null,
-      selectedDate: null
+      }
     };
   },
   methods: {
@@ -111,7 +96,7 @@ export default {
         if (valid) {
           alert("submit!");
         } else {
-          console.log("error submit!!");
+          // console.log("error submit!!");
           return false;
         }
       });
@@ -131,7 +116,70 @@ export default {
     date(input, format) {
       return moment(input).format(format);
     }
+  },
+  async created() {
+    Vue.http.options.root = process.env.VUE_APP_API_BASE;
+    Vue.http.interceptors.push(interceptor(this));
+    // this.$user = await this.auth();
+  },
+  async mounted() {
+    const imageUrls = (await Config.get({ key: "bannerUrls" })).body.value;
+    const quotesRaw = (await Config.get({ key: "quotes" })).body.value;
+    const quotes = quotesRaw.map(i => ({ membersCount: i[0], price: i[1] }));
+    this.quotes = quotes;
+    this.imageUrls = imageUrls;
   }
+};
+
+const interceptor = vm => {
+  return request => {
+    vm.isLoading = true;
+
+    const token = window.localStorage.getItem("token");
+
+    if (token) {
+      request.headers.set("Authorization", token);
+    }
+    // stop request and return 401 response when no token exist except for login request
+    // if (request.url !== "auth/login" && !window.localStorage.getItem("token")) {
+    //   return request.respondWith(null, { status: 401 });
+    // }
+    return response => {
+      vm.isLoading = false;
+
+      if (response.status >= 500) {
+        const message = "服务器内部错误";
+
+        vm.$notify({
+          message,
+          icon: "add_alert",
+          horizontalAlign: "center",
+          verticalAlign: "bottom",
+          type: "danger"
+        });
+
+        return Promise.reject(message);
+      } else if (response.status >= 400) {
+        // redirect to login page on any 401 response
+        if (response.status === 401) {
+          window.location.hash = "#/login";
+          window.localStorage.removeItem("token");
+        }
+        const message = response.body.message || response.statusText;
+        alert(message);
+        // vm.$notify({
+        //   message,
+        //   icon: "add_alert",
+        //   horizontalAlign: "center",
+        //   verticalAlign: "bottom",
+        //   type: "warning"
+        // });
+
+        return Promise.reject(message);
+      }
+      return response;
+    };
+  };
 };
 </script>
 

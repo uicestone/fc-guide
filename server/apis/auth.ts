@@ -10,7 +10,7 @@ bluebird.promisifyAll(redisClient);
 export default router => {
   router.route("/auth/login").post(
     handleAsyncErrors(async (req, res) => {
-      if (!req.body.username) {
+      if (!req.body.email) {
         throw new HttpError(400, "请输入用户名");
       }
 
@@ -18,7 +18,7 @@ export default router => {
         throw new HttpError(400, "请输入密码");
       }
 
-      const user = await User.findOne({ username: req.body.username }).select([
+      const user = await User.findOne({ email: req.body.email }).select([
         "+password",
         "+token"
       ]);
@@ -54,11 +54,6 @@ export default router => {
       console.log(authLog);
     })
   );
-
-  router.route("/auth/logout").get((req, res) => {
-    console.log(`[USR] 用户 ${req.user.name} 退出登录`);
-    res.end();
-  });
 
   router.route("/auth/user").get(
     handleAsyncErrors(async (req, res) => {

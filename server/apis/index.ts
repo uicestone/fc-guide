@@ -4,11 +4,14 @@ import authenticate from "../middlewares/authenticate";
 import castEmbedded from "../middlewares/castEmbedded";
 import Auth from "./auth";
 import Booking from "./booking";
+import Config from "./config";
 
 export default (app, router) => {
   // register routes
-  router = Auth(router);
-  router = Booking(router);
+
+  [Auth, Booking, Config].forEach(R => {
+    router = R(router);
+  });
 
   router.get("/", (req, res) => {
     res.send("Welcome!");
