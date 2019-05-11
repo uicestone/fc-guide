@@ -7,16 +7,11 @@
       el-card.box-card
         .clearfix(slot="header")
           span 景点介绍
-        p 景点介绍景点介绍景点介绍景点介绍，景点介绍景点介绍景点介绍。
-        p 景点介绍景点介绍景点介绍。
+        span(v-html="sceneIntro")
       el-card.box-card
         .clearfix(slot="header")
           span 路线与时长
-        p 路线与时长路线与时长，路线与时长，路线与时长。路线与时长路线与时长。
-        ol
-          li 路线与时长1
-          li 路线与时长2
-          li 路线与时长3
+        span(v-html="itinerary")
       el-card.box-card
         .clearfix(slot="header")
           span 收费
@@ -71,6 +66,8 @@ export default {
   data() {
     return {
       imageUrls: [],
+      sceneIntro: "",
+      itinerary: "",
       quotes: [[]],
       booking: {},
       userEmail: null,
@@ -123,11 +120,11 @@ export default {
     // this.$user = await this.auth();
   },
   async mounted() {
-    const imageUrls = (await Config.get({ key: "bannerUrls" })).body.value;
     const quotesRaw = (await Config.get({ key: "quotes" })).body.value;
-    const quotes = quotesRaw.map(i => ({ membersCount: i[0], price: i[1] }));
-    this.quotes = quotes;
-    this.imageUrls = imageUrls;
+    this.quotes = quotesRaw.map(i => ({ membersCount: i[0], price: i[1] }));
+    this.imageUrls = (await Config.get({ key: "bannerUrls" })).body.value;
+    this.itinerary = (await Config.get({ key: "itinerary" })).body.value;
+    this.sceneIntro = (await Config.get({ key: "sceneIntro" })).body.value;
   }
 };
 
