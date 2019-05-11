@@ -97,6 +97,13 @@ export default {
           return false;
         }
       });
+    },
+    async initConfigs() {
+      return (await Promise.all(
+        ["bannerUrls", "sceneIntro", "itinerary", "quotes"].map(key =>
+          Config.get({ key })
+        )
+      )).map(r => r.body.value);
     }
   },
   watch: {
@@ -120,11 +127,16 @@ export default {
     // this.$user = await this.auth();
   },
   async mounted() {
-    const quotesRaw = (await Config.get({ key: "quotes" })).body.value;
-    this.quotes = quotesRaw.map(i => ({ membersCount: i[0], price: i[1] }));
-    this.imageUrls = (await Config.get({ key: "bannerUrls" })).body.value;
-    this.itinerary = (await Config.get({ key: "itinerary" })).body.value;
-    this.sceneIntro = (await Config.get({ key: "sceneIntro" })).body.value;
+    const [
+      bannerUrls,
+      sceneIntro,
+      itinerary,
+      quotes
+    ] = await this.initConfigs();
+    this.quotes = quotes.map(i => ({ membersCount: i[0], price: i[1] }));
+    this.imageUrls = bannerUrls;
+    this.itinerary = itinerary;
+    this.sceneIntro = sceneIntro;
   }
 };
 
