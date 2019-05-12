@@ -12,7 +12,6 @@
   "author": "Uice Lu",
   "license": "GPL-3.0",
   "dependencies": {
-    "@babel/preset-env": "^7.4.4",
     "@types/cors": "^2.8.5",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^4.16.1",
@@ -30,6 +29,7 @@
     "moment": "^2.24.0",
     "mongoose": "^5.5.7",
     "node-sass": "^4.12.0",
+    "nodemailer": "^6.1.1",
     "pug": "^2.0.3",
     "pug-plain-loader": "^1.0.0",
     "redis": "^2.8.0",
@@ -38,19 +38,21 @@
     "vue-resource": "^1.5.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
     "@vue/cli-plugin-babel": "^3.7.0",
     "@vue/cli-plugin-eslint": "^3.7.0",
     "@vue/cli-service": "^3.7.0",
     "babel-eslint": "^10.0.1",
     "babel-plugin-component": "^1.1.1",
-    "babel-preset-env": "^1.7.0",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
     "ncc": "^0.3.6",
     "nodemon": "^1.19.0",
     "ts-node": "^8.1.0",
     "typescript": "^3.4.5",
-    "vue-template-compiler": "^2.5.21"
+    "vue-template-compiler": "^2.5.21",
+    "webpack": "^4.31.0"
   },
   "eslintConfig": {
     "root": true,
