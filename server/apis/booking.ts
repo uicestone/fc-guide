@@ -3,6 +3,8 @@ import handleAsyncErrors from "../utils/handleAsyncErrors";
 import parseSortString from "../utils/parseSortString";
 import Booking from "../models/booking";
 import HttpError from "../utils/HttpError";
+import User from "../models/user";
+import { sendPaymentEmail } from "../services/sendEmail";
 
 export default router => {
   // Booking CURD
@@ -13,7 +15,28 @@ export default router => {
     .post(
       handleAsyncErrors(async (req, res) => {
         const booking = new Booking(req.body);
+
+        if (!req.body.userEmail) {
+          throw new HttpError(400, "Missing user email.");
+        }
+
+        const user = await User.findOneAndUpdate(
+          { email: req.body.userEmail },
+          { email: req.body.userEmail },
+          {
+            new: true,
+            upsert: true,
+            //@ts-ignore
+            useFindAndModify: false
+          }
+        );
+
+        booking.user = user;
+
         await booking.save();
+
+        sendPaymentEmail(booking);
+
         res.json(booking);
       })
     )
@@ -25,8 +48,7 @@ export default router => {
         const { limit, skip } = req.pagination;
         const query = Booking.find();
         const sort = parseSortString(req.query.order) || {
-          goodsType: 1,
-          name: 1
+          createdAt: -1
         };
 
         let total = await query.countDocuments();
@@ -91,6 +113,24 @@ export default router => {
         const booking = req.item;
         await booking.remove();
         res.end();
+      })
+    );
+
+  router
+    .route("/availability")
+
+    // get availability of dates
+    .get(
+      handleAsyncErrors(async (req, res) => {
+        const availability = {
+          full: [],
+          am: [],
+          pm: []
+        };
+        // Booking.aggregate([
+        //   { $match: { date: { $gte: "2019-05", $lt: "2019-06" } } },
+        //   {$group:{_id:1, }}
+        // ]);
       })
     );
 

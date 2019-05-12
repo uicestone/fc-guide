@@ -17,7 +17,8 @@ import {
   DatePicker,
   Radio,
   RadioGroup,
-  Calendar
+  Calendar,
+  Dialog
 } from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
 import VueResource from "vue-resource";
@@ -41,7 +42,8 @@ import App from "./App.vue";
   DatePicker,
   Radio,
   RadioGroup,
-  Calendar
+  Calendar,
+  Dialog
 ].forEach(c => Vue.use(c));
 Vue.use(VueResource);
 

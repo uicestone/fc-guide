@@ -7,14 +7,14 @@ const userSchema = new Schema({
   email: String,
   password: { type: String, select: false },
   token: { type: String, select: false },
-  roles: [String],
+  roles: { type: [String], default: ["customer"] },
   name: String,
   gender: String,
   mobile: String,
   avatarUri: String
 });
 
-userSchema.index({ username: 1 }, { unique: true });
+userSchema.index({ email: 1 }, { unique: true });
 
 // userSchema.virtual("avatarUrl").get(function(req) {
 //   if (!this.avatarUri) return null;

@@ -52,14 +52,22 @@
           el-form-item(label="邮箱" prop="userEmail")
             el-input(type="email" v-model="booking.userEmail" placeholder="接收邮件完成下面的步骤")
       el-button.block-button(type="primary" size="medium" @click="submitBooking")
-        span 发送付款邮件
+        span Send me payment email
         span(v-if="booking.price")  ¥{{ booking.price }}
+      el-dialog(
+        title="Payment email sent"
+        :visible.sync="!!booking.user"
+        fullscreen
+        :show-close="false"
+      )
+        p Please accomplish payment in your email in 10 minites,
+        p or your booking will be canceled.
 </template>
 
 <script>
 import Vue from "vue";
 import moment from "moment";
-import { Config } from "./resources.ts";
+import { Config, Booking } from "./resources.ts";
 
 export default {
   name: "app",
@@ -88,22 +96,20 @@ export default {
     };
   },
   methods: {
-    submitBooking() {
-      this.$refs.form.validate(valid => {
-        if (valid) {
-          alert("submit!");
-        } else {
-          // console.log("error submit!!");
-          return false;
-        }
-      });
-    },
     async initConfigs() {
       return (await Promise.all(
         ["bannerUrls", "sceneIntro", "itinerary", "quotes"].map(key =>
           Config.get({ key })
         )
       )).map(r => r.body.value);
+    },
+    submitBooking() {
+      this.$refs.form.validate(valid => {
+        valid && this.createBooking();
+      });
+    },
+    async createBooking() {
+      this.booking = (await Booking.save(this.booking)).body;
     }
   },
   watch: {

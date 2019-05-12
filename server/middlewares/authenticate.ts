@@ -3,7 +3,7 @@ import HttpError from "../utils/HttpError";
 
 export default async function(req, res, next) {
   if (
-    ["^/api/$", "^/api/auth/login", "^/api/config"].some(p =>
+    ["^/api/$", "^/api/auth/login", "^/api/config", "^/api/booking"].some(p =>
       req._parsedUrl.pathname.match(p)
     )
   ) {

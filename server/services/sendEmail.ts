@@ -1,6 +1,11 @@
 import nodemailer from "nodemailer";
+import { IBooking } from "../models/booking";
 
-export default async function sendEmail(to) {
+export default async function sendEmail(
+  to: string,
+  title: string,
+  content: string
+) {
   try {
     // Generate test SMTP service account from ethereal.email
     // Only needed if you don't have a real mail account for testing
@@ -21,9 +26,8 @@ export default async function sendEmail(to) {
     let info = await transporter.sendMail({
       from: `"Guide Booking System" <${process.env.SMTP_ACCOUNT}>`, // sender address
       to: to, // list of receivers
-      subject: "Booking is pending payment...", // Subject line
-      html:
-        "<p>Hello, </p><p>Please pay the booking to confirm using one of following method</p>" // html body
+      subject: title, // Subject line
+      html: content // html body
     });
 
     console.log("Message sent: %s", info.messageId);
@@ -35,4 +39,37 @@ export default async function sendEmail(to) {
   } catch (err) {
     console.error(err.message);
   }
+}
+
+export function sendPaymentEmail(booking: IBooking) {
+  sendEmail(
+    booking.user.email,
+    "Booking is pending payment...",
+    `<p>Hello, </p><p>You booking at\
+     ${booking.date} (${booking.ampm}) \
+     for ${booking.membersCount} is pending payment.</p>\
+     <p>Please use one of following links to accomplish payment.</p>\
+     <ul>\
+       <li><a>Wechat Pay</a></li>\
+       <li><a>PayPal</a></li>\
+     </ul>\
+     <br>\
+     <p>In case of any question, please email ${
+       process.env.ADMIN_EMAIL
+     }, thank you.</p>`
+  );
+}
+
+export function sendConfirmEmail(booking: IBooking) {
+  sendEmail(
+    booking.user.email,
+    "Booking is confirmed!",
+    `<p>Hello, </p><p>You booking at\
+     ${booking.date} (${booking.ampm}) \
+     for ${booking.membersCount} is confirmed.</p>\
+     <br>\
+     <p>In case of any question, please email ${
+       process.env.ADMIN_EMAIL
+     }, thank you.</p>`
+  );
 }
