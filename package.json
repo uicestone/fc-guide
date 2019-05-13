@@ -6,7 +6,7 @@
     "dev": "nodemon --watch server index.ts --exec ts-node ./index.ts",
     "play": "nodemon --watch server --exec ts-node ./server/utils/play.ts",
     "serve": "vue-cli-service serve",
-    "build": "ncc build index.ts -o dist/server && vue-cli-service build --dest build/web && rm -r dist/web && cp -r build/web dist/web",
+    "build": "ncc build index.ts -o dist/server && pm2 startOrRestart ecosystem.config.js && vue-cli-service build --dest build/web && rm -r dist/web && cp -r build/web dist/web",
     "lint": "vue-cli-service lint"
   },
   "author": "Uice Lu",
