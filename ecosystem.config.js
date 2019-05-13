@@ -21,7 +21,7 @@ module.exports = {
       ref: "origin/master",
       repo: "https://github.com/uicestone/fc-guide.git",
       path: "/var/www/fc-guide",
-      "post-deploy": "yarn && yarn build && rm -r web && cp -r dist web"
+      "post-deploy": "yarn && yarn build"
     }
   }
 };
