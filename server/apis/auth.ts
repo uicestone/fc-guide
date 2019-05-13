@@ -1,11 +1,11 @@
-import bluebird from "bluebird";
+// import bluebird from "bluebird";
 import crypto from "crypto";
-import { createClient as redisClient } from "redis";
+// import { createClient as redisClient } from "redis";
 import handleAsyncErrors from "../utils/handleAsyncErrors";
 import User, { IUser } from "../models/user";
 import HttpError from "../utils/HttpError";
 
-bluebird.promisifyAll(redisClient);
+// bluebird.promisifyAll(redisClient);
 
 export default router => {
   router.route("/auth/login").post(

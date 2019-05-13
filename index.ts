@@ -19,7 +19,7 @@ mongoose.Promise = global.Promise;
 
 app.use(handleError);
 app.use(bodyParser.json({ limit: "4mb" }));
-app.use("/", express.static("./dist"));
+app.use("/", express.static("./dist/web"));
 app.set("trust proxy", "loopback");
 applyRoutes(app, router);
 
