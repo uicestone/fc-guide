@@ -17,7 +17,7 @@ module.exports = {
   deploy: {
     production: {
       user: "www-data",
-      host: [{ host: "stirad" }],
+      host: [{ host: "stirad.com" }],
       ref: "origin/master",
       repo: "https://github.com/uicestone/fc-guide.git",
       path: "/var/www/fc-guide",
