@@ -30,7 +30,8 @@
             slot="dateCell"
             slot-scope="{date, data}"
           )
-            span {{ date | date('D') }}
+            .date-cell(:class="{'am-booked': booked(date, 'am'), 'pm-booked': booked(date, 'pm'), 'booked': booked(date)}")
+              span {{ date | date('D') }}
       el-card.box-card
         .clearfix(slot="header")
           span 预订
@@ -44,8 +45,8 @@
             )
           el-form-item(label="时间" prop="ampm")
             el-radio-group(v-model="booking.ampm")
-              el-radio(label="am") 上午
-              el-radio(label="pm") 下午
+              el-radio(label="am" :disabled="booked(booking.date, 'am')") 上午
+              el-radio(label="pm" :disabled="booked(booking.date, 'pm')") 下午
           el-form-item(label="人数" prop="membersCount")
             el-select(v-model="booking.membersCount")
               el-option(v-for="n in 8" :key="n" :value="n" :label="n")
@@ -80,6 +81,7 @@ export default {
       booking: {},
       userEmail: null,
       selectedDate: null,
+      availability: { am: [], pm: [], full: [] },
       formRules: {
         userEmail: [
           { required: true, message: "请填写邮箱" },
@@ -110,6 +112,12 @@ export default {
     },
     async createBooking() {
       this.booking = (await Booking.save(this.booking)).body;
+    },
+    booked(date, ampm = "full") {
+      if (typeof date !== "string") {
+        date = moment(date).format("YYYY-MM-DD");
+      }
+      return this.availability[ampm].includes(date);
     }
   },
   watch: {
@@ -118,8 +126,16 @@ export default {
       if (!quote) return;
       this.booking.price = quote.price;
     },
-    selectedDate(date) {
+    async selectedDate(date, prevDate) {
       this.booking.date = moment(date).format("YYYY-MM-DD");
+      delete this.booking.ampm;
+      const checkMonth = moment(date).format("YYYY-MM");
+      const prevCheckMonth = moment(prevDate).format("YYYY-MM");
+      if (checkMonth !== prevCheckMonth) {
+        this.availability = (await Booking.checkAvailability({
+          month: checkMonth
+        })).body;
+      }
     }
   },
   filters: {
@@ -143,6 +159,9 @@ export default {
     this.imageUrls = bannerUrls;
     this.itinerary = itinerary;
     this.sceneIntro = sceneIntro;
+    this.selectedDate = moment()
+      .add(1, "day")
+      .toDate();
   }
 };
 
@@ -235,6 +254,31 @@ body {
       padding-bottom: 0;
     }
   }
+}
+
+.el-calendar-table .el-calendar-day {
+  padding: 0;
+  .date-cell {
+    box-sizing: border-box;
+    padding: 8px;
+    height: 100%;
+    width: 100%;
+
+    &.am-booked {
+      background: linear-gradient(to bottom, #efecec 52%, transparent 48%);
+    }
+    &.pm-booked {
+      background: linear-gradient(to bottom, transparent 52%, #efecec 48%);
+    }
+    &.booked {
+      background: #efecec;
+    }
+  }
+}
+
+.is-selected .date-cell {
+  border: 2px solid #409eff;
+  padding: 6px !important;
 }
 
 .el-form {

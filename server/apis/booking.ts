@@ -1,3 +1,4 @@
+import moment from "moment";
 import paginatify from "../middlewares/paginatify";
 import handleAsyncErrors from "../utils/handleAsyncErrors";
 import parseSortString from "../utils/parseSortString";
@@ -117,20 +118,52 @@ export default router => {
     );
 
   router
-    .route("/availability")
+    .route("/booking-availability/:month")
 
     // get availability of dates
     .get(
       handleAsyncErrors(async (req, res) => {
+        const yearMonth = req.params.month;
+        const ltYearMonth = moment(yearMonth, "YYYY-MM")
+          .add(1, "month")
+          .format("YYYY-MM");
         const availability = {
           full: [],
           am: [],
           pm: []
         };
-        // Booking.aggregate([
-        //   { $match: { date: { $gte: "2019-05", $lt: "2019-06" } } },
-        //   {$group:{_id:1, }}
-        // ]);
+        const availabilityByDates = await Booking.aggregate([
+          { $match: { date: { $gte: yearMonth, $lt: ltYearMonth } } },
+          {
+            $group: {
+              _id: "$date",
+              total: { $sum: 1 },
+              am: { $sum: { $cond: [{ $eq: ["$ampm", "am"] }, 1, 0] } },
+              pm: { $sum: { $cond: [{ $eq: ["$ampm", "pm"] }, 1, 0] } }
+            }
+          },
+          {
+            $project: {
+              date: "$_id",
+              _id: false,
+              total: true,
+              am: true,
+              pm: true
+            }
+          }
+        ]);
+
+        availabilityByDates.forEach(availabilityByDate => {
+          if (availabilityByDate.total >= 2) {
+            availability.full.push(availabilityByDate.date);
+          } else if (availabilityByDate.am >= 1) {
+            availability.am.push(availabilityByDate.date);
+          } else if (availabilityByDate.pm >= 1) {
+            availability.pm.push(availabilityByDate.date);
+          }
+        });
+
+        res.json(availability);
       })
     );
 
