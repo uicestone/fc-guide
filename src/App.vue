@@ -68,7 +68,7 @@
 <script>
 import Vue from "vue";
 import moment from "moment";
-import { Config, Booking } from "./resources.ts";
+import { Config, Booking } from "./resources";
 
 export default {
   name: "app",
