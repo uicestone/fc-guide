@@ -17,13 +17,13 @@ import {
   DatePicker,
   Radio,
   RadioGroup,
+  // @ts-ignore
   Calendar,
   Dialog
 } from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
 import VueResource from "vue-resource";
 import App from "./App.vue";
-
 [
   Button,
   ButtonGroup,
@@ -45,6 +45,7 @@ import App from "./App.vue";
   Calendar,
   Dialog
 ].forEach(c => Vue.use(c));
+
 Vue.use(VueResource);
 
 Vue.config.productionTip = false;

@@ -11,6 +11,7 @@ const bookingSchema = new Schema({
   ampm: String,
   membersCount: Number,
   status: String,
+  price: Number,
   payment: Object
 });
 
@@ -30,6 +31,7 @@ export interface IBooking extends mongoose.Document {
   ampm: string;
   membersCount: number;
   status: string;
+  price: number;
   payment?: Object;
 }
 

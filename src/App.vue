@@ -65,89 +65,100 @@
         p or your booking will be canceled.
 </template>
 
-<script>
-import Vue from "vue";
+<script lang="ts">
+import { Prop, Vue, Watch, Component } from "vue-property-decorator";
 import moment from "moment";
 import { Config, Booking } from "./resources";
+import { Form } from "element-ui";
 
-export default {
-  name: "app",
-  data() {
-    return {
-      imageUrls: [],
-      sceneIntro: "",
-      itinerary: "",
-      quotes: [[]],
-      booking: {},
-      userEmail: null,
-      selectedDate: null,
-      availability: { am: [], pm: [], full: [] },
-      formRules: {
-        userEmail: [
-          { required: true, message: "请填写邮箱" },
-          {
-            type: "email",
-            message: "请输入正确的邮箱地址",
-            trigger: ["blur", "change"]
-          }
-        ],
-        membersCount: { required: true, message: "请选择人数" },
-        date: { required: true, message: "请选择日期", trigger: ["blur"] },
-        ampm: { required: true, message: "请选择时间" }
-      }
-    };
-  },
-  methods: {
-    async initConfigs() {
-      return (await Promise.all(
-        ["bannerUrls", "sceneIntro", "itinerary", "quotes"].map(key =>
-          Config.get({ key })
-        )
-      )).map(r => r.body.value);
-    },
-    submitBooking() {
-      this.$refs.form.validate(valid => {
-        valid && this.createBooking();
-      });
-    },
-    async createBooking() {
-      this.booking = (await Booking.save(this.booking)).body;
-    },
-    booked(date, ampm = "full") {
-      if (typeof date !== "string") {
-        date = moment(date).format("YYYY-MM-DD");
-      }
-      return this.availability[ampm].includes(date);
-    }
-  },
-  watch: {
-    "booking.membersCount"(count) {
-      const quote = this.quotes.filter(q => q.membersCount === count)[0];
-      if (!quote) return;
-      this.booking.price = quote.price;
-    },
-    async selectedDate(date, prevDate) {
-      this.booking.date = moment(date).format("YYYY-MM-DD");
-      delete this.booking.ampm;
-      const checkMonth = moment(date).format("YYYY-MM");
-      const prevCheckMonth = moment(prevDate).format("YYYY-MM");
-      if (checkMonth !== prevCheckMonth) {
-        this.availability = (await Booking.checkAvailability({
-          month: checkMonth
-        })).body;
-      }
-    }
-  },
+@Component({
   filters: {
-    date(input, format) {
+    date(input: any, format: string) {
       return moment(input).format(format);
     }
-  },
+  }
+})
+export default class extends Vue {
+  name = "app";
+  imageUrls = [];
+  sceneIntro = "";
+  itinerary = "";
+  quotes = [{ membersCount: 0, price: 0 }];
+  booking = {
+    date: "",
+    ampm: "am",
+    membersCount: 0,
+    price: 0,
+    status: "pending"
+  };
+  userEmail = null;
+  selectedDate: Date | string = "";
+  availability: { am: string[]; pm: string[]; full: string[] } = {
+    am: [],
+    pm: [],
+    full: []
+  };
+  formRules = {
+    userEmail: [
+      { required: true, message: "请填写邮箱" },
+      {
+        type: "email",
+        message: "请输入正确的邮箱地址",
+        trigger: ["blur", "change"]
+      }
+    ],
+    membersCount: { required: true, message: "请选择人数" },
+    date: { required: true, message: "请选择日期", trigger: ["blur"] },
+    ampm: { required: true, message: "请选择时间" }
+  };
+  $refs!: {
+    form: Form;
+  };
+  async initConfigs() {
+    return (await Promise.all(
+      ["bannerUrls", "sceneIntro", "itinerary", "quotes"].map(key =>
+        Config.get({ key })
+      )
+    )).map(r => r.body.value);
+  }
+  submitBooking() {
+    this.$refs.form.validate(valid => {
+      valid && this.createBooking();
+    });
+  }
+  async createBooking() {
+    this.booking = (await Booking.save(this.booking)).body;
+  }
+  booked(date: string | Date, ampm: "am" | "pm" | "full" = "full") {
+    if (typeof date !== "string") {
+      date = moment(date).format("YYYY-MM-DD");
+    }
+    return this.availability[ampm].includes(date);
+  }
+  @Watch("booking.membersCount") onMembersCountChange(count: number) {
+    const quote = this.quotes.filter(q => q.membersCount === count)[0];
+    if (!quote) return;
+    this.booking.price = quote.price;
+  }
+  @Watch("selectedDate") async onSelectedDateChange(
+    date: string | Date,
+    prevDate: string | Date
+  ) {
+    this.booking.date = moment(date).format("YYYY-MM-DD");
+    delete this.booking.ampm;
+    const checkMonth = moment(date).format("YYYY-MM");
+    const prevCheckMonth = moment(prevDate).format("YYYY-MM");
+    if (checkMonth !== prevCheckMonth) {
+      this.availability = (await Booking.checkAvailability({
+        month: checkMonth
+      })).body;
+    }
+  }
   async created() {
-    Vue.http.options.root = process.env.VUE_APP_API_BASE;
-    Vue.http.interceptors.push(interceptor(this));
+    (<any>Vue).http.options.root = process.env.VUE_APP_API_BASE;
+    (<any>Vue).http.interceptors.push(interceptor(this));
     // this.$user = await this.auth();
-  },
+  }
   async mounted() {
     const [
       bannerUrls,
@@ -155,7 +166,10 @@ export default {
       itinerary,
       quotes
     ] = await this.initConfigs();
-    this.quotes = quotes.map(i => ({ membersCount: i[0], price: i[1] }));
+    this.quotes = quotes.map((q: [number, number][]) => ({
+      membersCount: q[0],
+      price: q[1]
+    }));
     this.imageUrls = bannerUrls;
     this.itinerary = itinerary;
     this.sceneIntro = sceneIntro;
@@ -163,10 +177,10 @@ export default {
       .add(1, "day")
       .toDate();
   }
-};
+}
 
-const interceptor = vm => {
-  return request => {
+const interceptor = (vm: any) => {
+  return (request: any) => {
     vm.isLoading = true;
 
     const token = window.localStorage.getItem("token");
@@ -178,7 +192,7 @@ const interceptor = vm => {
     // if (request.url !== "auth/login" && !window.localStorage.getItem("token")) {
     //   return request.respondWith(null, { status: 401 });
     // }
-    return response => {
+    return (response: any) => {
       vm.isLoading = false;
 
       if (response.status >= 500) {

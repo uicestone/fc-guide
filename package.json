@@ -1,12 +1,14 @@
 {
   "name": "fc-guide",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Guide booking for Forbidden City",
   "scripts": {
-    "dev": "nodemon --watch server index.ts --exec ts-node ./index.ts",
+    "dev": "nodemon --watch server index.ts --exec 'ts-node --project server/tsconfig.json ./index.ts'",
     "play": "nodemon --watch server --exec ts-node ./server/utils/play.ts",
-    "serve": "vue-cli-service serve",
-    "build": "ncc build index.ts -o dist/server && pm2 startOrRestart ecosystem.config.js && vue-cli-service build --dest build/web && rm -r dist/web && cp -r build/web dist/web",
+    "serve": "vue-cli-service serve --project src/tsconfig.json",
+    "build-server": "tsc --project server && rm -rf dist/server && cp -r build/server dist/server && pm2 startOrRestart ecosystem.config.js",
+    "build-web": "vue-cli-service build --dest build/web && rm -rf dist/web && cp -r build/web dist/web",
+    "build": "yarn build-server && yarn build-web",
     "lint": "vue-cli-service lint"
   },
   "author": "Uice Lu",
@@ -35,6 +37,8 @@
     "redis": "^2.8.0",
     "sass-loader": "^7.1.0",
     "vue": "^2.6.10",
+    "vue-class-component": "^7.0.2",
+    "vue-property-decorator": "^8.1.0",
     "vue-resource": "^1.5.1"
   },
   "devDependencies": {
@@ -42,7 +46,9 @@
     "@babel/preset-env": "^7.4.4",
     "@vue/cli-plugin-babel": "^3.7.0",
     "@vue/cli-plugin-eslint": "^3.7.0",
+    "@vue/cli-plugin-typescript": "^3.7.0",
     "@vue/cli-service": "^3.7.0",
+    "@vue/eslint-config-typescript": "^4.0.0",
     "@zeit/ncc": "^0.18.5",
     "babel-eslint": "^10.0.1",
     "babel-plugin-component": "^1.1.1",
@@ -61,11 +67,12 @@
     },
     "extends": [
       "plugin:vue/essential",
-      "eslint:recommended"
+      "eslint:recommended",
+      "@vue/typescript"
     ],
     "rules": {},
     "parserOptions": {
-      "parser": "babel-eslint"
+      "parser": "@typescript-eslint/parser"
     }
   },
   "postcss": {
