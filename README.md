@@ -1,29 +1,29 @@
+[![Build Status](https://travis-ci.org/uicestone/fc-guide.svg?branch=master)](https://travis-ci.org/uicestone/fc-guide)
+
 # fc-guide
 
 ## Project setup
 ```
 yarn install
 ```
+then create a .env file from .env.example.
 
-### Compiles and hot-reloads for development
+### Front-end development
 ```
-yarn run serve
+yarn serve
+```
+
+### Server side development
+```
+yarn dev
 ```
 
 ### Compiles and minifies for production
 ```
-yarn run build
-```
-
-### Run your tests
-```
-yarn run test
+yarn build
 ```
 
 ### Lints and fixes files
 ```
-yarn run lint
+yarn lint
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
