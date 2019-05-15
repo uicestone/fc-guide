@@ -111,7 +111,7 @@ export default class extends Vue {
     date: { required: true, message: "请选择日期", trigger: ["blur"] },
     ampm: { required: true, message: "请选择时间" }
   };
-  $refs = { form: new Form() };
+  $refs!: { form: Form };
   async initConfigs() {
     return (await Promise.all(
       ["bannerUrls", "sceneIntro", "itinerary", "quotes"].map(key =>

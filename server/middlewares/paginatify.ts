@@ -1,6 +1,3 @@
-import User from "../models/user";
-import HttpError from "../utils/HttpError";
-
 export default async function(req, res, next) {
   req.pagination = { limit: 20, skip: 0 };
 

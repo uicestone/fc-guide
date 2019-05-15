@@ -29,7 +29,6 @@ export default router => {
 
       if (user.password !== req.body.password) {
         throw new HttpError(403, "密码错误");
-        return;
       }
 
       if (user.token) {

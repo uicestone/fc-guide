@@ -9,7 +9,8 @@
     "build-server": "tsc --project server",
     "build-web": "vue-cli-service build --dest build/web",
     "build": "yarn build-server && yarn build-web",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "lint-server": "eslint ./server/*.ts ./server/*/*.ts ./server/*/*/*.ts"
   },
   "author": "Uice Lu",
   "license": "GPL-3.0",
@@ -72,7 +73,10 @@
       "@vue/typescript",
       "@vue/prettier"
     ],
-    "rules": {},
+    "rules": {
+      "no-console": 1,
+      "no-unused-vars": 1
+    },
     "parserOptions": {
       "parser": "@typescript-eslint/parser",
       "ecmaFeatures": {
