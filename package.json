@@ -19,7 +19,6 @@
     "@types/express": "^4.16.1",
     "@types/method-override": "^0.0.31",
     "@types/mongoose": "^5.5.0",
-    "@types/vue": "^2.0.0",
     "@types/vue-resource": "^0.9.34",
     "bluebird": "^3.5.4",
     "core-js": "^2.6.5",
