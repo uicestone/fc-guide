@@ -1,8 +1,9 @@
 language: node_js
 node_js:
   - lts/*
+cache: yarn
 script: yarn build
 after_success:
   - echo "${DEPLOY_PUB_KEY}" | base64 --decode >/tmp/id_rsa.pub
   - chmod 600 /tmp/id_rsa.pub
-  - scp -r -o "StrictHostKeyChecking no" -i /tmp/id_rsa.pub build ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
+  - scp -r -o "StrictHostKeyChecking no" -i /tmp/id_rsa.pub build/ ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
