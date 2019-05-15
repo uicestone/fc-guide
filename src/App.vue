@@ -66,7 +66,7 @@
 </template>
 
 <script lang="ts">
-import { Prop, Vue, Watch, Component } from "vue-property-decorator";
+import { Vue, Watch, Component } from "vue-property-decorator";
 import moment from "moment";
 import { Config, Booking } from "./resources";
 import { Form } from "element-ui";
@@ -111,9 +111,7 @@ export default class extends Vue {
     date: { required: true, message: "请选择日期", trigger: ["blur"] },
     ampm: { required: true, message: "请选择时间" }
   };
-  $refs!: {
-    form: Form;
-  };
+  $refs = { form: new Form() };
   async initConfigs() {
     return (await Promise.all(
       ["bannerUrls", "sceneIntro", "itinerary", "quotes"].map(key =>
