@@ -3,11 +3,11 @@
   "version": "0.9.0",
   "description": "Guide booking for Forbidden City",
   "scripts": {
-    "dev": "nodemon --watch server index.ts --exec 'ts-node --project server/tsconfig.json ./index.ts'",
+    "dev": "nodemon --watch server --exec 'ts-node --project server/tsconfig.json ./server/'",
     "play": "nodemon --watch server --exec ts-node ./server/utils/play.ts",
     "serve": "vue-cli-service serve --project src/tsconfig.json",
-    "build-server": "tsc --project server && rm -rf dist/server && cp -r build/server dist/server && pm2 startOrRestart ecosystem.config.js",
-    "build-web": "vue-cli-service build --dest build/web && rm -rf dist/web && cp -r build/web dist/web",
+    "build-server": "tsc --project server",
+    "build-web": "vue-cli-service build --dest build/web",
     "build": "yarn build-server && yarn build-web",
     "lint": "vue-cli-service lint"
   },
