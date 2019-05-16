@@ -14,8 +14,16 @@
         enabled. Please enable it to continue.</strong
       >
     </noscript>
-    <script src="https://www.paypal.com/sdk/js?client-id=<%= VUE_APP_PAYPAL_CLIENT_ID %>&currency=EUR"></script>
     <div id="app"></div>
     <!-- built files will be auto injected -->
+    <script type="text/javascript">
+      var head = document.getElementsByTagName("head")[0];
+      var js = document.createElement("script");
+
+      js.type = "text/javascript";
+      js.src =
+        "https://www.paypal.com/sdk/js?client-id=<%= VUE_APP_PAYPAL_CLIENT_ID %>&currency=EUR";
+      window.location.hash.match(/bookingId=(\w+)/) && head.appendChild(js);
+    </script>
   </body>
 </html>
