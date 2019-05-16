@@ -45,15 +45,18 @@ export function sendPaymentEmail(booking: IBooking) {
   sendEmail(
     booking.user.email,
     "Booking is pending payment...",
-    `<p>Hello, </p><p>You booking at\
+    `<p>Hello, </p><p>Your booking at\
      ${booking.date} (${booking.ampm}) \
-     for ${booking.membersCount} is pending payment.</p>\
+     for ${booking.membersCount} person${
+      booking.membersCount > 1 ? "s" : ""
+    } is pending payment.</p>\
      <p>Please use one of following links to accomplish payment.</p>\
      <ul>\
        <li><a>Wechat Pay</a></li>\
-       <li><a>PayPal</a></li>\
+       <li><a href="${process.env.APP_HOME}/#bookingId=${
+      booking.id
+    }">PayPal</a></li>\
      </ul>\
-     <br>\
      <p>In case of any question, please email ${
        process.env.ADMIN_EMAIL
      }, thank you.</p>`
@@ -64,12 +67,25 @@ export function sendConfirmEmail(booking: IBooking) {
   sendEmail(
     booking.user.email,
     "Booking is confirmed!",
-    `<p>Hello, </p><p>You booking at\
+    `<p>Hello, </p><p>Your booking at\
      ${booking.date} (${booking.ampm}) \
-     for ${booking.membersCount} is confirmed.</p>\
-     <br>\
+     for ${booking.membersCount} person${
+      booking.membersCount > 1 ? "s" : ""
+    } is confirmed. </p><p>Booking reference is <b>${booking.id.substr(
+      -4
+    )}</b>.</p>\
      <p>In case of any question, please email ${
        process.env.ADMIN_EMAIL
      }, thank you.</p>`
+  );
+
+  sendEmail(
+    booking.user.email,
+    `New booking received! (${booking.id.substr(-4)})`,
+    `<p>Hello, </p><p>${booking.user.email} has paid for booking at\
+     ${booking.date} (${booking.ampm}) \
+     for ${booking.membersCount} person${
+      booking.membersCount > 1 ? "s" : ""
+    }. </p><p>Booking reference is <b>${booking.id.substr(-4)}</b>.</p>`
   );
 }

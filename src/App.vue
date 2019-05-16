@@ -76,10 +76,15 @@
           h3 Booking Overview
           ul
             li {{ booking.date }} ({{ booking.ampm.toUpperCase() }})
-            li {{ booking.membersCount }} Person(s)
+            li {{ booking.membersCount }} Person
+              span(v-if="booking.membersCount>1") s
         el-divider
 
-        #paypal-button-container
+        #paypal-button-container(v-if="booking.id" v-show="booking.status=='pending'")
+        .payment-success(v-if="booking.id" v-show="booking.status=='paid'")
+          blockquote Booking confirmed, we have sent the voucher to your email: 
+          blockquote.text-center
+            b {{ booking.user.email }}
 </template>
 
 <script lang="ts">
@@ -89,6 +94,7 @@ import { Config, Booking } from "./resources";
 import { Form } from "element-ui";
 
 @Component({
+  name: "App",
   filters: {
     date(input: any, format: string) {
       return moment(input).format(format);
@@ -107,7 +113,8 @@ export default class extends Vue {
     ampm: "am",
     membersCount: 0,
     price: 0,
-    status: "pending"
+    status: "pending",
+    payment: {}
   };
   userEmail = null;
   selectedDate: Date | string = "";
@@ -150,7 +157,10 @@ export default class extends Vue {
     if (typeof date !== "string") {
       date = moment(date).format("YYYY-MM-DD");
     }
-    return this.availability[ampm].includes(date);
+    return (
+      this.availability[ampm].includes(date) ||
+      this.availability.full.includes(date)
+    );
   }
   renderPayPalButton(booking: {
     id: string;
@@ -160,7 +170,7 @@ export default class extends Vue {
   }) {
     (<any>window).paypal
       .Buttons({
-        createOrder: function(data: any, actions: any) {
+        createOrder: (data: any, actions: any) => {
           const { id, date, membersCount, price } = booking;
           return actions.order.create({
             purchase_units: [
@@ -169,18 +179,21 @@ export default class extends Vue {
                   value: price
                 },
                 description: `Guide service on ${date} for ${membersCount}.`,
-                custom_id: id
+                custom_id: id,
+                invoice_id: id
               }
             ]
           });
         },
-        onApprove: function(data: any, actions: any) {
+        onApprove: async (data: any, actions: any) => {
           // Capture the funds from the transaction
-          console.log("onApprove", data, actions);
-          return actions.order.capture().then(function(details: any) {
-            console.log(details);
-            // update booking status and send email to user & admin
-          });
+          // console.log("onApprove", data, actions);
+          const details = await actions.order.capture();
+          this.booking = (await Booking.update(
+            { id: this.booking.id },
+            { payment: details }
+          )).body;
+          // console.log(this.booking);
         }
       })
       .render("#paypal-button-container");
@@ -377,7 +390,15 @@ body {
   font-size: 16px;
 }
 
+.text-center {
+  text-align: center;
+}
+
 .text-right {
   text-align: right;
+}
+
+p {
+  word-break: normal;
 }
 </style>

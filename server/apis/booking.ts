@@ -5,7 +5,7 @@ import parseSortString from "../utils/parseSortString";
 import Booking from "../models/booking";
 import HttpError from "../utils/HttpError";
 import User from "../models/user";
-import { sendPaymentEmail } from "../services/sendEmail";
+import { sendPaymentEmail, sendConfirmEmail } from "../services/sendEmail";
 
 export default router => {
   // Booking CURD
@@ -95,12 +95,16 @@ export default router => {
 
     .patch(
       handleAsyncErrors(async (req, res) => {
-        if (req.user.roles.indexOf("admin") === -1) {
-          throw new HttpError(403);
-        }
+        // if (req.user.roles.indexOf("admin") === -1) {
+        //   throw new HttpError(403);
+        // }
         const booking = req.item;
         booking.set(req.body);
+        if (booking.payment && booking.payment.status === "COMPLETED") {
+          booking.status = "paid";
+        }
         await booking.save();
+        sendConfirmEmail(booking);
         res.json(booking);
       })
     )
