@@ -57,12 +57,29 @@
         span(v-if="booking.price")  ¥{{ booking.price }}
       el-dialog(
         title="Payment email sent"
-        :visible.sync="!!booking.user"
+        :visible.sync="!!booking.user && !showPaypalButton"
         fullscreen
         :show-close="false"
       )
         p Please accomplish payment in your email in 10 minites,
         p or your booking will be canceled.
+      el-dialog(
+        title="Payment"
+        :visible.sync="showPaypalButton"
+        fullscreen
+        :show-close="false"
+      )
+        .booking-overview(v-if="booking.id")
+          h3 Price
+          ul
+            li ¥ {{ booking.price.toFixed(2) }}
+          h3 Booking Overview
+          ul
+            li {{ booking.date }} ({{ booking.ampm.toUpperCase() }})
+            li {{ booking.membersCount }} Person(s)
+        el-divider
+
+        #paypal-button-container
 </template>
 
 <script lang="ts">
@@ -85,6 +102,7 @@ export default class extends Vue {
   itinerary = "";
   quotes = [{ membersCount: 0, price: 0 }];
   booking = {
+    id: "",
     date: "",
     ampm: "am",
     membersCount: 0,
@@ -111,6 +129,7 @@ export default class extends Vue {
     date: { required: true, message: "请选择日期", trigger: ["blur"] },
     ampm: { required: true, message: "请选择时间" }
   };
+  showPaypalButton = false;
   $refs!: { form: Form };
   async initConfigs() {
     return (await Promise.all(
@@ -132,6 +151,39 @@ export default class extends Vue {
       date = moment(date).format("YYYY-MM-DD");
     }
     return this.availability[ampm].includes(date);
+  }
+  renderPayPalButton(booking: {
+    id: string;
+    price: number;
+    membersCount: number;
+    date: string;
+  }) {
+    (<any>window).paypal
+      .Buttons({
+        createOrder: function(data: any, actions: any) {
+          const { id, date, membersCount, price } = booking;
+          return actions.order.create({
+            purchase_units: [
+              {
+                amount: {
+                  value: price
+                },
+                description: `Guide service on ${date} for ${membersCount}.`,
+                custom_id: id
+              }
+            ]
+          });
+        },
+        onApprove: function(data: any, actions: any) {
+          // Capture the funds from the transaction
+          console.log("onApprove", data, actions);
+          return actions.order.capture().then(function(details: any) {
+            console.log(details);
+            // update booking status and send email to user & admin
+          });
+        }
+      })
+      .render("#paypal-button-container");
   }
   @Watch("booking.membersCount") onMembersCountChange(count: number) {
     const quote = this.quotes.filter(q => q.membersCount === count)[0];
@@ -174,6 +226,15 @@ export default class extends Vue {
     this.selectedDate = moment()
       .add(1, "day")
       .toDate();
+
+    const matchBookingId = window.location.hash.match(/bookingId=(\w+)/);
+    if (matchBookingId) {
+      const bookingId = matchBookingId[1];
+      this.booking = (await Booking.get({ id: bookingId })).body;
+      this.showPaypalButton = true;
+      await this.$nextTick();
+      this.renderPayPalButton(this.booking);
+    }
   }
 }
 

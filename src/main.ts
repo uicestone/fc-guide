@@ -19,7 +19,8 @@ import {
   RadioGroup,
   // @ts-ignore
   Calendar,
-  Dialog
+  Dialog,
+  Divider
 } from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
 import VueResource from "vue-resource";
@@ -43,7 +44,8 @@ import App from "./App.vue";
   Radio,
   RadioGroup,
   Calendar,
-  Dialog
+  Dialog,
+  Divider
 ].forEach(c => Vue.use(c));
 
 Vue.use(VueResource);
