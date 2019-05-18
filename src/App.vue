@@ -6,24 +6,24 @@
           img(:src="url")
       el-card.box-card
         .clearfix(slot="header")
-          span 景点介绍
+          span Attractions
         span(v-html="sceneIntro")
       el-card.box-card
         .clearfix(slot="header")
-          span 路线与时长
+          span Itinerary
         span(v-html="itinerary")
       el-card.box-card
         .clearfix(slot="header")
-          span 收费
+          span Charge
         el-row
           el-col(:span="12")
             el-table(:data="quotes.slice(0, 4)")
-              el-table-column(prop="membersCount" label="人数" width="60px")
-              el-table-column(prop="price" label="价格（¥）")
+              el-table-column(prop="membersCount" label="Pers" width="60px")
+              el-table-column(prop="price" label="Price（¥）")
           el-col(:span="12")
             el-table(:data="quotes.slice(4, 8)")
-              el-table-column(prop="membersCount" label="人数" width="60px")
-              el-table-column(prop="price" label="价格（¥）")
+              el-table-column(prop="membersCount" label="Pers" width="60px")
+              el-table-column(prop="price" label="Price（¥）")
       el-card.box-card.no-padding
         el-calendar(v-model="selectedDate")
           template(
@@ -34,27 +34,27 @@
               span {{ date | date('D') }}
       el-card.box-card
         .clearfix(slot="header")
-          span 预订
+          span Booking
         el-form(ref="form" :model="booking" :rules="formRules" label-position="left" label-width="60px")
-          el-form-item(label="日期" prop="date" disabled)
+          el-form-item(label="Date" prop="date" disabled)
             el-date-picker(
               v-model="booking.date"
               format="yyyy-MM-dd"
               value-format="yyyy-MM-dd"
               disabled
             )
-          el-form-item(label="时间" prop="ampm")
+          el-form-item(label="Time" prop="ampm")
             el-radio-group(v-model="booking.ampm")
-              el-radio(label="am" :disabled="booked(booking.date, 'am')") 上午
-              el-radio(label="pm" :disabled="booked(booking.date, 'pm')") 下午
-          el-form-item(label="人数" prop="membersCount")
+              el-radio(label="am" :disabled="booked(booking.date, 'am')") AM
+              el-radio(label="pm" :disabled="booked(booking.date, 'pm')") PM
+          el-form-item(label="Pers" prop="membersCount")
             el-select(v-model="booking.membersCount")
               el-option(v-for="n in 8" :key="n" :value="n" :label="n")
-          el-form-item(label="邮箱" prop="userEmail")
-            el-input(type="email" v-model="booking.userEmail" placeholder="接收邮件完成下面的步骤")
+          el-form-item(label="Email" prop="userEmail")
+            el-input(type="email" v-model="booking.userEmail" placeholder="Receive email and continue...")
       el-button.block-button(type="primary" size="medium" @click="submitBooking")
         span Send me payment email
-        span(v-if="booking.price")  ¥{{ booking.price }}
+        span(v-if="booking.price")  CNY ¥ {{ booking.price }}
       el-dialog(
         title="Payment email sent"
         :visible.sync="!!booking.user && !showPaypalButton"
@@ -72,7 +72,7 @@
         .booking-overview(v-if="booking.id")
           h3 Price
           ul
-            li ¥ {{ booking.price.toFixed(2) }}
+            li CNY ¥ {{ booking.price.toFixed(2) }}
           h3 Booking Overview
           ul
             li {{ booking.date }} ({{ booking.ampm.toUpperCase() }})
@@ -125,16 +125,16 @@ export default class extends Vue {
   };
   formRules = {
     userEmail: [
-      { required: true, message: "请填写邮箱" },
+      { required: true, message: "Email required." },
       {
         type: "email",
-        message: "请输入正确的邮箱地址",
+        message: "Invalid email.",
         trigger: ["blur", "change"]
       }
     ],
-    membersCount: { required: true, message: "请选择人数" },
-    date: { required: true, message: "请选择日期", trigger: ["blur"] },
-    ampm: { required: true, message: "请选择时间" }
+    membersCount: { required: true, message: "Person(s) required." },
+    date: { required: true, message: "Date required.", trigger: ["blur"] },
+    ampm: { required: true, message: "Time required." }
   };
   showPaypalButton = false;
   $refs!: { form: Form };
@@ -268,7 +268,7 @@ const interceptor = (vm: any) => {
       vm.isLoading = false;
 
       if (response.status >= 500) {
-        const message = "服务器内部错误";
+        const message = "Internal server error.";
 
         vm.$notify({
           message,
